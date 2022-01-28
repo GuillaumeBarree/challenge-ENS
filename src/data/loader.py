@@ -6,8 +6,8 @@ import torch
 import yaml
 
 from torch.utils.data import DataLoader
-from preprocessing import apply_preprocessing
-from dataset_utils import basic_random_split, RegressionDataset, load_test_data
+from data.preprocessing import apply_preprocessing
+from data.dataset_utils import basic_random_split, RegressionDataset, load_test_data
 
 
 def main(cfg):  # pylint: disable=too-many-locals

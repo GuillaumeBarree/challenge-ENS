@@ -1,3 +1,3 @@
 # Algo Challenge
 
-Based on ENS challenge proposed by Enedis in 2019
+Learning biological properties of molecules from their structure by Simulations Plus

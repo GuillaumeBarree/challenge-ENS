@@ -1,0 +1,15 @@
+DATA_DIR: '../data'
+OUTPUT_DIR: '../models'
+DATASET:
+  DATA_FORMAT: csv
+  PREPROCESSING:
+    NORMALIZE:
+      TYPE: "MinMaxScaler"  # ["MinMaxScalar", "StandardScaler"]
+    PCA:
+      N_COMPONENTS: 0.8
+  BATCH_SIZE: 64
+  VALID_RATIO: 0.2
+  VERBOSITY: True
+  NUM_THREADS: 4
+TEST:
+  BATCH_SIZE: 64

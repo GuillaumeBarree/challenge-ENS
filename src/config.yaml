@@ -8,8 +8,18 @@ DATASET:
     PCA:
       N_COMPONENTS: 0.8
   BATCH_SIZE: 64
-  VALID_RATIO: 0.2
+  VALID_RATIO: 0.3
   VERBOSITY: True
   NUM_THREADS: 4
+TRAIN:
+  EPOCH: 100
+  CHECKPOINT_STEP: 500
+  MODEL: LinearNet_1
+  LOG_DIR: 'tensorboard/metrics/linear_1'
+  SAVE_DIR: '../models'
+  LR_INITIAL : 0.001
+  LR_DECAY: 0.001
+  LR_PATIENCE : 5
+  LR_THRESHOLD : 0.01
 TEST:
   BATCH_SIZE: 64

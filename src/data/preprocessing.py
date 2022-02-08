@@ -21,13 +21,19 @@ def apply_preprocessing(cfg, data, test=False):
     # Preprocessing parameters
     type_ = cfg["NORMALIZE"]["TYPE"]
     n_components = cfg["PCA"]["N_COMPONENTS"]
-    name = f"pipeline_{type_}_ncompo_{n_components}.pkl"
 
     if not test:
         scaler = MinMaxScaler() if type_ == "MinMaxScalar" else StandardScaler()
         pca = PCA(n_components=n_components)
-
-        pipeline = Pipeline([("scaling", scaler), ("pca", pca)])
+        if cfg["NORMALIZE"]["ACTIVE"] and cfg["PCA"]["ACTIVE"]:
+            pipeline = Pipeline([("scaling", scaler), ("pca", pca)])
+            name = f"pipeline_{type_}_ncompo_{n_components}.pkl"
+        elif cfg["NORMALIZE"]["ACTIVE"]:
+            pipeline = Pipeline([("scaling", scaler)])
+            name = f"pipeline_{type_}.pkl"
+        elif cfg["PCA"]["ACTIVE"]:
+            pipeline = Pipeline([("pca", pca)])
+            name = f"pipeline_ncompo_{n_components}.pkl"
 
         data["x_train"] = pipeline.fit_transform(data["x_train"])
         data["x_valid"] = pipeline.transform(data["x_valid"])
@@ -37,6 +43,12 @@ def apply_preprocessing(cfg, data, test=False):
 
         return data
 
+    if cfg["NORMALIZE"]["ACTIVE"] and cfg["PCA"]["ACTIVE"]:
+        name = f"pipeline_{type_}_ncompo_{n_components}.pkl"
+    elif cfg["NORMALIZE"]["ACTIVE"]:
+        name = f"pipeline_{type_}.pkl"
+    elif cfg["PCA"]["ACTIVE"]:
+        name = f"pipeline_ncompo_{n_components}.pkl"
     pipeline = pickle.load(open(os.path.join("./data/normalized_data", name), "rb"))
     data["x_test"] = pipeline.transform(data["x_test"])
 

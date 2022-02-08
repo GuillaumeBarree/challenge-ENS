@@ -11,7 +11,7 @@ from torch.utils.tensorboard import SummaryWriter
 from torch.optim import lr_scheduler
 
 from tools.trainer import train_one_epoch
-from tools.utils import load_model
+from tools.utils import load_model, launch_grid_search
 from tools.valid import test_one_epoch, ModelCheckpoint
 import data.loader as loader
 
@@ -35,8 +35,20 @@ def generate_unique_logpath(logdir, raw_run_name):
         i = i + 1
 
 
-def main(cfg, path_to_config):  # pylint: disable=too-many-locals
-    """Main pipeline to train a model
+def main_ml(cfg):  # pylint: disable=too-many-locals
+    """Main pipeline to train a ML model
+
+    Args:
+        cfg (dict): config with all the necessary parameters
+    """
+    # Load data
+    preprocessed_data = loader.main(cfg=cfg)
+
+    launch_grid_search(cfg, preprocessed_data)
+
+
+def main_nn(cfg, path_to_config):  # pylint: disable=too-many-locals
+    """Main pipeline to train a NN model
 
     Args:
         cfg (dict): config with all the necessary parameters
@@ -140,4 +152,8 @@ if __name__ == "__main__":
     with open(args.path_to_config, "r") as ymlfile:
         config_file = yaml.load(ymlfile, Loader=yaml.Loader)
 
-    main(cfg=config_file, path_to_config=args.path_to_config)
+    if config_file["MODELS"]["NN"]:
+        main_nn(cfg=config_file, path_to_config=args.path_to_config)
+
+    else:
+        main_ml(cfg=config_file)

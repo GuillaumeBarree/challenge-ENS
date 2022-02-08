@@ -4,13 +4,20 @@ DATASET:
   DATA_FORMAT: csv
   PREPROCESSING:
     NORMALIZE:
-      TYPE: "MinMaxScaler"  # ["MinMaxScalar", "StandardScaler"]
+      ACTIVE: True
+      TYPE: "StandardScaler"  # ["MinMaxScalar", "StandardScaler"]
     PCA:
-      N_COMPONENTS: 0.8
+      ACTIVE: True
+      N_COMPONENTS: 0.95
   BATCH_SIZE: 64
   VALID_RATIO: 0.3
   VERBOSITY: True
   NUM_THREADS: 4
+MODELS:
+  NN: False
+  ML:
+    ACTIVE: True
+    TYPE: 'RandomForest'
 TRAIN:
   EPOCH: 100
   CHECKPOINT_STEP: 500

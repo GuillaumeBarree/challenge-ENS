@@ -109,11 +109,9 @@ def remove_useless_features(training_data):
     """
     data_dict = {}
 
-    filter_sample = np.where(training_data["target"]["Y"] == 0)[0]
-
     for key, data in training_data.items():
 
-        features = data.drop(columns=["_ID"], index=filter_sample)
+        features = data.drop(columns=["_ID"])
         data_dict[key] = features
 
     return data_dict

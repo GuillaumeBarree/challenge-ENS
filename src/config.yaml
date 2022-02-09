@@ -4,13 +4,13 @@ DATASET:
   DATA_FORMAT: csv
   PREPROCESSING:
     NORMALIZE:
-      ACTIVE: True
+      ACTIVE: False
       TYPE: "StandardScaler"  # ["MinMaxScalar", "StandardScaler"]
     PCA:
-      ACTIVE: True
+      ACTIVE: False
       N_COMPONENTS: 0.95
   BATCH_SIZE: 64
-  VALID_RATIO: 0.3
+  VALID_RATIO: 0.15
   VERBOSITY: True
   NUM_THREADS: 4
 MODELS:

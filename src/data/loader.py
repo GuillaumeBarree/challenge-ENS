@@ -38,9 +38,9 @@ def main(cfg):  # pylint: disable=too-many-locals
     preprocessed_test_data = apply_preprocessing(
         cfg=cfg["DATASET"]["PREPROCESSING"], data=test_data, test=True
     )
-    print(preprocessed_data["x_train"].shape)
+
     if not cfg["MODELS"]["NN"]:
-        return preprocessed_data
+        return preprocessed_data, preprocessed_test_data
 
     # Train
     x_train = preprocessed_data["x_train"]

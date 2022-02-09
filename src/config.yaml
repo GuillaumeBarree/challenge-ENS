@@ -52,3 +52,4 @@ TRAIN:
   LR_THRESHOLD : 0.01
 TEST:
   BATCH_SIZE: 64
+  PATH_TO_MODEL: '../models/randomforest_0/model.pck'

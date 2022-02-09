@@ -46,7 +46,7 @@ def main_ml(cfg, path_to_config):  # pylint: disable=too-many-locals
         path_to_config(string): path to the config file
     """
     # Load data
-    preprocessed_data = loader.main(cfg=cfg)
+    preprocessed_data, _ = loader.main(cfg=cfg)
 
     # Init directory to save model saving best models
     top_logdir = cfg["TRAIN"]["SAVE_DIR"]

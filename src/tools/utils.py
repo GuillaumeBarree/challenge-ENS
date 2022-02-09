@@ -1,5 +1,7 @@
 """This module aims to define utils function for the project."""
+import os
 import numpy as np
+import pandas as pd
 
 from sklearn.ensemble import ExtraTreesRegressor, RandomForestRegressor
 from sklearn.model_selection import GridSearchCV
@@ -98,3 +100,23 @@ def launch_grid_search(cfg, preprocessed_data):  # pylint: disable=too-many-loca
         "n_jobs": 1,
     }
     return model, params
+
+
+def retrieve_id(cfg):
+    """Retrieve the ID column of the test file
+
+    Args:
+        cfg (dict): configuration file
+
+    Returns:
+        numpy.array: IDs of the samples
+    """
+    data_files = os.listdir(os.path.join(cfg["DATA_DIR"], "test/"))
+
+    for datafile in data_files:
+        if "input" in datafile:
+            test_data = pd.read_csv(
+                os.path.join("../data/test", datafile), delimiter=",", decimal="."
+            )
+
+    return test_data["_ID"].to_numpy()

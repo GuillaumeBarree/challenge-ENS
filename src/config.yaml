@@ -53,3 +53,9 @@ TRAIN:
 TEST:
   BATCH_SIZE: 64
   PATH_TO_MODEL: '../models/randomforest_0/model.pck'
+  PATH_TO_CSV: './output.csv'
+  AVERAGE:
+    ACTIVE: True
+    PATH:
+      - {MODEL: '../models/randomforest_0/model.pck', CONFIG: '../models/randomforest_0/config_file.yaml'}
+      - {MODEL: '../models/randomforest_1/model.pck', CONFIG: '../models/randomforest_1/config_file.yaml'}

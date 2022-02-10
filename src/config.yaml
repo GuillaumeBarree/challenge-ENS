@@ -40,6 +40,11 @@ MODELS:
       gamma: 'auto'
       kernel: 'rbf'
       nu: 0.5
+    GradientBoosting:
+      loss: 'squared_error'
+      criterion: 'squared_error'
+      n_estimators: 100
+      max_features: 40
 TRAIN:
   EPOCH: 100
   CHECKPOINT_STEP: 500

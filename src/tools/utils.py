@@ -3,8 +3,13 @@ import os
 import numpy as np
 import pandas as pd
 
-from sklearn.ensemble import ExtraTreesRegressor, RandomForestRegressor
+from sklearn.ensemble import (
+    ExtraTreesRegressor,
+    GradientBoostingRegressor,
+    RandomForestRegressor,
+)
 from sklearn.model_selection import GridSearchCV
+from sklearn.svm import NuSVR
 from models.LinearNet_1 import LinearNet_1
 from models.MachineLearningModels import models
 
@@ -46,9 +51,9 @@ def launch_grid_search(cfg, preprocessed_data):  # pylint: disable=too-many-loca
 
         param_grid = {
             "min_samples_split": np.arange(4, 9, 2),
-            "max_depth": np.arange(18, 19, 1),
-            "max_features": np.arange(x_train.shape[1] - 1, x_train.shape[1], 5),
-            "n_estimators": np.arange(70, 120, 5),
+            "max_depth": np.arange(18, 28, 2),
+            "max_features": np.arange(30, min(x_train.shape[1], 100), 10),
+            "n_estimators": np.arange(70, 120, 10),
         }
 
         rfr_cv = GridSearchCV(rfr, param_grid=param_grid, n_jobs=-1, cv=5, verbose=2)
@@ -67,9 +72,9 @@ def launch_grid_search(cfg, preprocessed_data):  # pylint: disable=too-many-loca
 
         param_grid = {
             "min_samples_split": np.arange(4, 9, 2),
-            "max_depth": np.arange(18, 28, 1),
-            "max_features": np.arange(50, x_train.shape[1], 5),
-            "n_estimators": np.arange(70, 120, 5),
+            "max_depth": np.arange(18, 28, 2),
+            "max_features": np.arange(30, min(x_train.shape[1], 100), 10),
+            "n_estimators": np.arange(70, 120, 10),
         }
 
         etr_cv = GridSearchCV(etr, param_grid=param_grid, n_jobs=-1, cv=5, verbose=2)
@@ -82,6 +87,53 @@ def launch_grid_search(cfg, preprocessed_data):  # pylint: disable=too-many-loca
             params[key] = int(value)
 
         return etr_cv.best_estimator_, params
+
+    elif cfg["MODELS"]["ML"]["TYPE"] == "GradientBoosting":
+        gbr = GradientBoostingRegressor()
+
+        param_grid = {
+            "learning_rate": [0.01, 0.05, 0.1, 1, 0.5],
+            "min_samples_leaf": [4, 5, 6],
+            "subsample": [0.6, 0.7, 0.8],
+            "min_samples_split": np.arange(4, 8, 2),
+            "max_depth": np.arange(18, 28, 2),
+            "max_features": np.arange(30, min(x_train.shape[1], 100), 10),
+            "n_estimators": np.arange(70, 120, 10),
+        }
+
+        gbr_cv = GridSearchCV(gbr, param_grid=param_grid, n_jobs=-1, cv=5, verbose=2)
+        gbr_cv.fit(
+            np.concatenate((x_train, x_valid)), np.concatenate((y_train, y_valid))
+        )
+
+        params = {}
+        for key, value in gbr_cv.best_params_.items():
+            params[key] = int(value)
+
+        return gbr_cv.best_estimator_, params
+
+    elif cfg["MODELS"]["ML"]["TYPE"] == "NuSVR":
+        nusvr = NuSVR()
+
+        param_grid = {
+            "C": [0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2],
+            "gamma": [0.008, 0.009, 0.01, 0.02, 0.03, "auto"],
+            "kernel": ["poly", "rbf"],
+            "nu": [0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
+        }
+
+        nusvr_cv = GridSearchCV(
+            nusvr, param_grid=param_grid, n_jobs=-1, cv=5, verbose=2
+        )
+        nusvr_cv.fit(
+            np.concatenate((x_train, x_valid)), np.concatenate((y_train, y_valid))
+        )
+
+        params = {}
+        for key, value in nusvr_cv.best_params_.items():
+            params[key] = int(value)
+
+        return nusvr_cv.best_estimator_, params
 
     model = RandomForestRegressor(
         bootstrap=False,

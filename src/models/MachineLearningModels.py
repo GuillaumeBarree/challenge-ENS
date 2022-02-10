@@ -1,6 +1,10 @@
 # pylint: disable=invalid-name
 """Create Machine Learning Regressor models."""
-from sklearn.ensemble import ExtraTreesRegressor, RandomForestRegressor
+from sklearn.ensemble import (
+    ExtraTreesRegressor,
+    GradientBoostingRegressor,
+    RandomForestRegressor,
+)
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.svm import NuSVR
 
@@ -22,5 +26,7 @@ def models(cfg):
         model = KNeighborsRegressor(**cfg["MODELS"]["ML"]["Knn"])
     elif cfg["MODELS"]["ML"]["TYPE"] == "NuSVR":
         model = NuSVR(**cfg["MODELS"]["ML"]["NuSVR"])
+    elif cfg["MODELS"]["ML"]["TYPE"] == "GradientBoosting":
+        model = GradientBoostingRegressor(**cfg["MODELS"]["ML"]["GradientBoosting"])
 
     return model

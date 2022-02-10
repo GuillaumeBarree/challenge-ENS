@@ -3,15 +3,18 @@
 import os
 import argparse
 from shutil import copyfile
+import json
+import pickle
 import yaml
 
+from sklearn.metrics import mean_squared_error
 import torch
 import torch.nn as nn
 from torch.utils.tensorboard import SummaryWriter
 from torch.optim import lr_scheduler
 
 from tools.trainer import train_one_epoch
-from tools.utils import load_model
+from tools.utils import load_model, launch_grid_search
 from tools.valid import test_one_epoch, ModelCheckpoint
 import data.loader as loader
 
@@ -35,8 +38,48 @@ def generate_unique_logpath(logdir, raw_run_name):
         i = i + 1
 
 
-def main(cfg, path_to_config):  # pylint: disable=too-many-locals
-    """Main pipeline to train a model
+def main_ml(cfg, path_to_config):  # pylint: disable=too-many-locals
+    """Main pipeline to train a ML model
+
+    Args:
+        cfg (dict): config with all the necessary parameters
+        path_to_config(string): path to the config file
+    """
+    # Load data
+    preprocessed_data, _ = loader.main(cfg=cfg)
+
+    # Init directory to save model saving best models
+    top_logdir = cfg["TRAIN"]["SAVE_DIR"]
+    save_dir = generate_unique_logpath(top_logdir, cfg["MODELS"]["ML"]["TYPE"].lower())
+    if not os.path.exists(save_dir):
+        os.mkdir(save_dir)
+
+    copyfile(path_to_config, os.path.join(save_dir, "config_file.yaml"))
+
+    if cfg["MODELS"]["ML"]["GRID_SEARCH"]:
+        model, params = launch_grid_search(cfg, preprocessed_data)
+
+        with open(os.path.join(save_dir, "best_params.json"), "w") as outfile:
+            json.dump(params, outfile, indent=2)
+    else:
+        model = load_model(cfg=cfg)
+
+    model.fit(X=preprocessed_data["x_train"], y=preprocessed_data["y_train"])
+    pickle.dump(model, open(os.path.join(save_dir, "model.pck"), "wb"))
+
+    y_pred = model.predict(preprocessed_data["x_valid"])
+
+    print("Valid MSE : ", mean_squared_error(preprocessed_data["y_valid"], y_pred))
+    print(
+        "Train MSE : ",
+        mean_squared_error(
+            preprocessed_data["y_train"], model.predict(preprocessed_data["x_train"])
+        ),
+    )
+
+
+def main_nn(cfg, path_to_config):  # pylint: disable=too-many-locals
+    """Main pipeline to train a NN model
 
     Args:
         cfg (dict): config with all the necessary parameters
@@ -140,4 +183,8 @@ if __name__ == "__main__":
     with open(args.path_to_config, "r") as ymlfile:
         config_file = yaml.load(ymlfile, Loader=yaml.Loader)
 
-    main(cfg=config_file, path_to_config=args.path_to_config)
+    if config_file["MODELS"]["NN"]:
+        main_nn(cfg=config_file, path_to_config=args.path_to_config)
+
+    else:
+        main_ml(cfg=config_file, path_to_config=args.path_to_config)

@@ -4,13 +4,42 @@ DATASET:
   DATA_FORMAT: csv
   PREPROCESSING:
     NORMALIZE:
-      TYPE: "MinMaxScaler"  # ["MinMaxScalar", "StandardScaler"]
+      ACTIVE: False
+      TYPE: "StandardScaler"  # ["MinMaxScalar", "StandardScaler"]
     PCA:
-      N_COMPONENTS: 0.8
+      ACTIVE: False
+      N_COMPONENTS: 0.95
   BATCH_SIZE: 64
-  VALID_RATIO: 0.3
+  VALID_RATIO: 0.15
   VERBOSITY: True
   NUM_THREADS: 4
+MODELS:
+  NN: False
+  ML:
+    ACTIVE: True
+    GRID_SEARCH: False
+    TYPE: 'RandomForest'  # ["RandomForest", "ExtraTrees", "Knn", "NuSVR"]
+    RandomForest:
+      bootstrap: False
+      max_depth: 22
+      max_features: 50
+      min_samples_split: 4
+      n_estimators: 80
+      n_jobs: -1
+    ExtraTrees:
+      bootstrap: False
+      max_depth: 20
+      max_features: 80
+      min_samples_split: 4
+      n_estimators: 80
+      n_jobs: -1
+    Knn:
+      n_neighbors: 9
+    NuSVR:
+      C: 1
+      gamma: 'auto'
+      kernel: 'rbf'
+      nu: 0.5
 TRAIN:
   EPOCH: 100
   CHECKPOINT_STEP: 500
@@ -23,3 +52,10 @@ TRAIN:
   LR_THRESHOLD : 0.01
 TEST:
   BATCH_SIZE: 64
+  PATH_TO_MODEL: '../models/randomforest_0/model.pck'
+  PATH_TO_CSV: './output.csv'
+  AVERAGE:
+    ACTIVE: True
+    PATH:
+      - {MODEL: '../models/randomforest_0/model.pck', CONFIG: '../models/randomforest_0/config_file.yaml'}
+      - {MODEL: '../models/randomforest_1/model.pck', CONFIG: '../models/randomforest_1/config_file.yaml'}

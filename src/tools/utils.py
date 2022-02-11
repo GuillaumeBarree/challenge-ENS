@@ -2,6 +2,8 @@
 import os
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 from sklearn.ensemble import ExtraTreesRegressor, RandomForestRegressor
 from sklearn.model_selection import GridSearchCV
@@ -120,3 +122,61 @@ def retrieve_id(cfg):
             )
 
     return test_data["_ID"].to_numpy()
+
+
+def generate_unique_logpath(logdir, raw_run_name):
+    """Verify if the path already exist
+
+    Args:
+        logdir (str): path to log dir
+        raw_run_name (str): name of the file
+
+    Returns:
+        str: path to the output file
+    """
+    i = 0
+    while True:
+        run_name = raw_run_name + "_" + str(i)
+        log_path = os.path.join(logdir, run_name)
+        if not os.path.isdir(log_path):
+            return log_path
+        i = i + 1
+
+
+def plot_feature_importance(importance, names, model_type):
+    """Plot feature importance based on ML mpdel used
+
+    Args:
+        importance (list): feature importance values
+        names (list): feature names
+        model_type (string): Model used
+    """
+
+    names = ["feature" + str(name) for name in names]
+    # Create arrays from feature importance and feature names
+    feature_importance = np.array(importance)
+    feature_names = np.array(names)
+
+    # Create a DataFrame using a Dictionary
+    data = {"feature_names": feature_names, "feature_importance": feature_importance}
+    fi_df = pd.DataFrame(data)
+
+    # Sort the DataFrame in order decreasing feature importance
+    fi_df.sort_values(by=["feature_importance"], ascending=False, inplace=True)
+
+    # Define size of bar plot
+    fig = plt.figure(figsize=(10, 8))
+    # Plot Searborn bar chart
+    sns.barplot(x=fi_df["feature_importance"][0:25], y=fi_df["feature_names"][0:25])
+    # Add chart labels
+    plt.title(model_type + " FEATURE IMPORTANCE (TOP 25)")
+    plt.xlabel("FEATURE IMPORTANCE")
+    plt.ylabel("FEATURE NAMES")
+
+    top_logdir = "../features_description/"
+    save_dir = generate_unique_logpath(top_logdir, model_type.lower())
+    if not os.path.exists(save_dir):
+        os.mkdir(save_dir)
+
+    plt.savefig(save_dir + "/feature_importance.png", dpi=500)
+    plt.close(fig)

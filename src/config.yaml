@@ -18,7 +18,7 @@ MODELS:
   ML:
     ACTIVE: True
     GRID_SEARCH: False
-    TYPE: 'RandomForest'  # ["RandomForest", "ExtraTrees", "Knn", "NuSVR"]
+    TYPE: 'ExtraTrees'  # ["RandomForest", "ExtraTrees", "Knn", "NuSVR"]
     RandomForest:
       bootstrap: False
       max_depth: 22

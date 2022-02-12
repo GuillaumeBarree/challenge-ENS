@@ -6,6 +6,7 @@ from shutil import copyfile
 import json
 import pickle
 import yaml
+import numpy as np
 
 from sklearn.metrics import mean_squared_error
 import torch
@@ -14,28 +15,14 @@ from torch.utils.tensorboard import SummaryWriter
 from torch.optim import lr_scheduler
 
 from tools.trainer import train_one_epoch
-from tools.utils import load_model, launch_grid_search
+from tools.utils import (
+    load_model,
+    launch_grid_search,
+    generate_unique_logpath,
+    plot_feature_importance,
+)
 from tools.valid import test_one_epoch, ModelCheckpoint
 import data.loader as loader
-
-
-def generate_unique_logpath(logdir, raw_run_name):
-    """Verify if the path already exist
-
-    Args:
-        logdir (str): path to log dir
-        raw_run_name (str): name of the file
-
-    Returns:
-        str: path to the output file
-    """
-    i = 0
-    while True:
-        run_name = raw_run_name + "_" + str(i)
-        log_path = os.path.join(logdir, run_name)
-        if not os.path.isdir(log_path):
-            return log_path
-        i = i + 1
 
 
 def main_ml(cfg, path_to_config):  # pylint: disable=too-many-locals
@@ -75,6 +62,12 @@ def main_ml(cfg, path_to_config):  # pylint: disable=too-many-locals
         mean_squared_error(
             preprocessed_data["y_train"], model.predict(preprocessed_data["x_train"])
         ),
+    )
+    print(preprocessed_data["x_train"].shape)
+    plot_feature_importance(
+        model.feature_importances_,
+        (np.arange(0, preprocessed_data["x_train"].shape[1])),
+        cfg["MODELS"]["ML"]["TYPE"],
     )
 
 

@@ -214,7 +214,7 @@ def launch_bayesian_opt(cfg, preprocessed_data):  # pylint: disable=too-many-loc
             "min_samples_split": (2, 10),
             "max_depth": (1, 150),
             "max_features": (10, x_train.shape[1]),
-            "n_estimators": (10, 1000),
+            "n_estimators": (10, 300),
         }
 
         best_solution = bayesian_optimization(

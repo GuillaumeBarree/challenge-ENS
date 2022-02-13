@@ -18,6 +18,7 @@ from tools.trainer import train_one_epoch
 from tools.utils import (
     load_model,
     launch_grid_search,
+    launch_bayesian_opt,
     generate_unique_logpath,
     plot_feature_importance,
 )
@@ -48,6 +49,15 @@ def main_ml(cfg, path_to_config):  # pylint: disable=too-many-locals
 
         with open(os.path.join(save_dir, "best_params.json"), "w") as outfile:
             json.dump(params, outfile, indent=2)
+
+    elif cfg["MODELS"]["ML"]["BAYESIAN_OPT"]:
+        model, params = launch_bayesian_opt(cfg, preprocessed_data)
+
+        print(params)
+
+        with open(os.path.join(save_dir, "best_params.json"), "w") as outfile:
+            json.dump(params, outfile, indent=2)
+
     else:
         model = load_model(cfg=cfg)
 
@@ -63,12 +73,17 @@ def main_ml(cfg, path_to_config):  # pylint: disable=too-many-locals
             preprocessed_data["y_train"], model.predict(preprocessed_data["x_train"])
         ),
     )
-    print(preprocessed_data["x_train"].shape)
-    plot_feature_importance(
-        model.feature_importances_,
-        (np.arange(0, preprocessed_data["x_train"].shape[1])),
-        cfg["MODELS"]["ML"]["TYPE"],
-    )
+
+    if cfg["MODELS"]["ML"]["TYPE"] in [
+        "RandomForest",
+        "ExtraTrees",
+        "GradientBoosting",
+    ]:
+        plot_feature_importance(
+            model.feature_importances_,
+            (np.arange(0, preprocessed_data["x_train"].shape[1])),
+            cfg["MODELS"]["ML"]["TYPE"],
+        )
 
 
 def main_nn(cfg, path_to_config):  # pylint: disable=too-many-locals

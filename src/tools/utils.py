@@ -345,28 +345,36 @@ def launch_bayesian_opt(cfg, preprocessed_data):  # pylint: disable=too-many-loc
 
         return model, params
 
-    # elif cfg["MODELS"]["ML"]["TYPE"] == "NuSVR":
-    #     nusvr = NuSVR()
+    elif cfg["MODELS"]["ML"]["TYPE"] == "NuSVR":
 
-    #     param_grid = {
-    #         "C": [0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2],
-    #         "gamma": [0.008, 0.009, 0.01, 0.02, 0.03, "auto"],
-    #         "kernel": ["poly", "rbf"],
-    #         "nu": [0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
-    #     }
+        def nusvr_function(C, gamma, nu):  # pylint: disable=invalid-name
+            return cross_val_score(
+                NuSVR(C=C, gamma=gamma, nu=nu, kernel="rbf"),
+                X=x_train,
+                y=y_train,
+                cv=cv_splits,
+                scoring="neg_mean_squared_error",
+                n_jobs=-1,
+            ).mean()
 
-    #     nusvr_cv = GridSearchCV(
-    #         nusvr, param_grid=param_grid, n_jobs=-1, cv=5, verbose=2
-    #     )
-    #     nusvr_cv.fit(
-    #         np.concatenate((x_train, x_valid)), np.concatenate((y_train, y_valid))
-    #     )
+        parameters = {"C": (0.1, 2), "gamma": (0.001, 0.1), "nu": (0.1, 0.9)}
 
-    #     params = {}
-    #     for key, value in nusvr_cv.best_params_.items():
-    #         params[key] = int(value)
+        best_solution = bayesian_optimization(
+            nusvr_function,
+            parameters,
+            n_iterations=cfg["MODELS"]["ML"]["BAYESIAN_ITERATIONS"],
+        )
 
-    #     return nusvr_cv.best_estimator_, params
+        params = best_solution["params"]
+
+        model = NuSVR(
+            C=max(params["C"], 0.1),
+            gamma=max(params["gamma"], 1e-4),
+            nu=max(params["nu"], 0.1),
+            kernel="rbf",
+        )
+
+        return model, params
 
     model = RandomForestRegressor(
         bootstrap=False,

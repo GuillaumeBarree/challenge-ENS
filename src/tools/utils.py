@@ -281,45 +281,69 @@ def launch_bayesian_opt(cfg, preprocessed_data):  # pylint: disable=too-many-loc
 
         return model, params
 
-    # elif cfg["MODELS"]["ML"]["TYPE"] == "GradientBoosting":
-    #     def gbr_function(min_samples_split,max_depth,max_features,n_estimators):
-    #         return cross_val_score(
-    #            GradientBoostingRegressor(
-    #                n_estimators=int(max(n_estimators,0)),
-    #                max_depth=int(max(max_depth,1)),
-    #                min_samples_split=int(max(min_samples_split,2)),
-    #                max_features=int(max(max_features,1)),
-    #                n_jobs=-1,
-    #                random_state=42,
-    #                ),
-    #            X=x_train,
-    #            y=y_train,
-    #            cv=cv_splits,
-    #            scoring="neg_mean_squared_error",
-    #            n_jobs=-1).mean()
+    elif cfg["MODELS"]["ML"]["TYPE"] == "GradientBoosting":
 
-    # gbr = GradientBoostingRegressor()
+        def gbr_function(  # pylint: disable=too-many-arguments
+            learning_rate,
+            min_samples_leaf,
+            subsample,
+            min_samples_split,
+            max_depth,
+            max_features,
+            n_estimators,
+        ):
+            return cross_val_score(
+                GradientBoostingRegressor(
+                    loss="squared_error",
+                    criterion="squared_error",
+                    learning_rate=max(learning_rate, 1e-4),
+                    min_samples_leaf=int(max(min_samples_leaf, 1)),
+                    subsample=max(subsample, 0.1),
+                    min_samples_split=int(max(min_samples_split, 2)),
+                    max_depth=int(max(max_depth, 1)),
+                    max_features=int(max(max_features, 1)),
+                    n_estimators=int(max(n_estimators, 0)),
+                    random_state=42,
+                ),
+                X=x_train,
+                y=y_train,
+                cv=cv_splits,
+                scoring="neg_mean_squared_error",
+                n_jobs=-1,
+            ).mean()
 
-    # param_grid = {
-    #     "learning_rate": [0.01, 0.05, 0.1, 1, 0.5],
-    #     "min_samples_leaf": [4, 5, 6],
-    #     "subsample": [0.6, 0.7, 0.8],
-    #     "min_samples_split": np.arange(4, 8, 2),
-    #     "max_depth": np.arange(18, 28, 2),
-    #     "max_features": np.arange(30, min(x_train.shape[1], 100), 10),
-    #     "n_estimators": np.arange(70, 120, 10),
-    # }
+        parameters = {
+            "learning_rate": (1e-4, 0.5),
+            "min_samples_leaf": (1, 10),
+            "subsample": (0.1, 0.9),
+            "min_samples_split": (2, 10),
+            "max_depth": (1, 300),
+            "max_features": (10, x_train.shape[1]),
+            "n_estimators": (10, 1000),
+        }
 
-    #     gbr_cv = GridSearchCV(gbr, param_grid=param_grid, n_jobs=-1, cv=5, verbose=2)
-    #     gbr_cv.fit(
-    #         np.concatenate((x_train, x_valid)), np.concatenate((y_train, y_valid))
-    #     )
+        best_solution = bayesian_optimization(
+            gbr_function,
+            parameters,
+            n_iterations=cfg["MODELS"]["ML"]["BAYESIAN_ITERATIONS"],
+        )
 
-    #     params = {}
-    #     for key, value in gbr_cv.best_params_.items():
-    #         params[key] = int(value)
+        params = best_solution["params"]
 
-    #     return gbr_cv.best_estimator_, params
+        model = GradientBoostingRegressor(
+            loss="squared_error",
+            criterion="squared_error",
+            learning_rate=(max(params["learning_rate"], 1e-4)),
+            min_samples_leaf=int(max(params["min_samples_leaf"], 1)),
+            subsample=max(params["subsample"], 0.1),
+            min_samples_split=int(max(params["min_samples_split"], 2)),
+            max_depth=int(max(params["max_depth"], 1)),
+            max_features=int(max(params["max_features"], 10)),
+            n_estimators=int(max(params["n_estimators"], 10)),
+            random_state=42,
+        )
+
+        return model, params
 
     # elif cfg["MODELS"]["ML"]["TYPE"] == "NuSVR":
     #     nusvr = NuSVR()

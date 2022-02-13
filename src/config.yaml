@@ -20,7 +20,7 @@ MODELS:
     GRID_SEARCH: False
     BAYESIAN_OPT: True
     BAYESIAN_ITERATIONS: 20
-    TYPE: 'ExtraTrees'  # ["RandomForest", "ExtraTrees", "Knn", "NuSVR", "GradientBoosting"]
+    TYPE: 'GradientBoosting'  # ["RandomForest", "ExtraTrees", "Knn", "NuSVR", "GradientBoosting"]
     RandomForest:
       bootstrap: False
       max_depth: 14

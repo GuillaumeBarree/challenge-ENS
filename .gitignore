@@ -153,3 +153,6 @@ vscode/
 notebooks/
 images/
 features_description/features_distribution
+features_description/extratrees_*
+features_description/randomforest_*
+features_description/gradientboosting_*

@@ -4,10 +4,10 @@ DATASET:
   DATA_FORMAT: csv
   PREPROCESSING:
     NORMALIZE:
-      ACTIVE: True
+      ACTIVE: False
       TYPE: "StandardScaler"  # ["MinMaxScalar", "StandardScaler"]
     PCA:
-      ACTIVE: True
+      ACTIVE: False
       N_COMPONENTS: 0.95
   BATCH_SIZE: 64
   VALID_RATIO: 0.15
@@ -18,9 +18,9 @@ MODELS:
   ML:
     ACTIVE: True
     GRID_SEARCH: False
-    BAYESIAN_OPT: True
+    BAYESIAN_OPT: False
     BAYESIAN_ITERATIONS: 20
-    TYPE: 'GradientBoosting'  # ["RandomForest", "ExtraTrees", "Knn", "NuSVR", "GradientBoosting"]
+    TYPE: 'RandomForest'  # ["RandomForest", "ExtraTrees", "Knn", "NuSVR", "GradientBoosting"]
     RandomForest:
       bootstrap: False
       max_depth: 14
